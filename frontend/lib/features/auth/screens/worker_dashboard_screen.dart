@@ -2044,6 +2044,98 @@ class _JobSummaryCard extends StatelessWidget {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// EARNINGS PAGE
+// Shows all accepted/completed jobs and total earnings summary.
+// ─────────────────────────────────────────────────────────────────────────────
+class _EarningsPage extends StatelessWidget {
+  final List<Map<String, dynamic>> jobRequests;
+  const _EarningsPage({required this.jobRequests});
+
+  @override
+  Widget build(BuildContext context) {
+    final completedJobs = jobRequests
+        .where((j) => j['status'] == 'accepted' || j['status'] == 'completed')
+        .toList();
+
+    final totalEarnings = completedJobs.fold<num>(
+      0,
+      (sum, j) => sum + (j['budget'] as num? ?? 0),
+    );
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Summary card
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Total Earnings',
+                  style: TextStyle(color: Colors.white70, fontSize: 13),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'SAR ${totalEarnings.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${completedJobs.length} completed job${completedJobs.length == 1 ? '' : 's'}',
+                  style: const TextStyle(color: Colors.white60, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          if (completedJobs.isEmpty)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.only(top: 40),
+                child: Column(
+                  children: [
+                    Icon(Icons.account_balance_wallet_outlined,
+                        size: 52, color: Colors.grey),
+                    SizedBox(height: 14),
+                    Text(
+                      'No earnings yet.\nCompleted jobs will appear here.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          else ...[
+            _SectionHeader(title: 'Completed Jobs', count: completedJobs.length),
+            const SizedBox(height: 12),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: completedJobs.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 8),
+              itemBuilder: (_, i) => _EarningRow(job: completedJobs[i]),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _EarningRow extends StatelessWidget {
   final Map<String, dynamic> job;
   const _EarningRow({required this.job});
