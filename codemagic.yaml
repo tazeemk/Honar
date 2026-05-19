@@ -1,0 +1,14 @@
+workflows:
+  default-workflow:
+    name: Default Workflow
+
+    environment:
+      flutter: stable
+
+    scripts:
+      - cd Frontend
+      - flutter pub get
+      - flutter build apk --release
+
+    artifacts:
+      - Frontend/build/app/outputs/flutter-apk/app-release.apk
